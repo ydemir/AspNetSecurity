@@ -1,8 +1,7 @@
 ﻿using AspNetSecurity.Models.AccountViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-
+using System.Threading.Tasks;
 
 namespace AspNetSecurity.Controllers
 {
@@ -27,11 +26,29 @@ namespace AspNetSecurity.Controllers
         //
         // POST: /Account/Register
         [HttpPost]
-        public IActionResult Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                //TODO: Register the user
+                IdentityUser user = new IdentityUser()
+                {
+                    Email = model.Email,
+                    UserName = model.Email
+                };
+
+            var result=  await  _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
             }
 
             // If we got this far, something failed, redisplay form
